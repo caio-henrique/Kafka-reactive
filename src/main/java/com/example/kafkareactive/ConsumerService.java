@@ -6,6 +6,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
 
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -17,12 +18,16 @@ public class ConsumerService {
     @KafkaListener(topics = "test", containerFactory = "kafkaListenerContainerFactory")
     public void listener(String message, Acknowledgment ack) {
 
+        TransactionSynchronizationManager.setActualTransactionActive(true);
+
         logger.info("Iniciando processo consumidor...");
 
         Mono<String> kafkaFlux = Mono.just(message).subscribeOn(Schedulers.elastic());
         kafkaFlux.subscribe(data -> logger.info(data),
                 error -> logger.error("Error", error),
                 () -> ack.acknowledge());
+
+        ack.acknowledge();
 
         logger.info("Finalizando processo consumidor...");
     }
