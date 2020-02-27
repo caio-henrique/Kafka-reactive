@@ -27,8 +27,6 @@ public class ConsumerService {
                 error -> logger.error("Error", error),
                 () -> ack.acknowledge());
 
-        ack.acknowledge();
-
         logger.info("Finalizando processo consumidor...");
     }
 }
